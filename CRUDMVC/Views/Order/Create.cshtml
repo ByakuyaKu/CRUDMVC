@@ -1,0 +1,62 @@
+﻿@model CRUDMVC.Models.Order
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1 class="mt-4">Create order</h1>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form id="form" asp-action="Create">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Number" class="control-label"></label>
+                <input asp-for="Number" class="form-control" />
+                <span asp-validation-for="Number" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Date" class="control-label"></label>
+                <input asp-for="Date" class="form-control" />
+                <span asp-validation-for="Date" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ProviderId" class="form-label mt-4">Select author</label>
+                <select class="form-select" asp-for="ProviderId" asp-items="ViewBag.Providers" multiple>
+                </select>
+                <span asp-validation-for="ProviderId" class="text-danger"></span>
+            </div>
+
+            <div id="orderItem" class="mt-4">
+                <div class="form-group">
+                    <label asp-for="@Model.orderItems[0].Name" class="control-label"></label>
+                    <input asp-for="@Model.orderItems[0].Name" class="form-control name" />
+                    <span asp-validation-for="@Model.orderItems[0].Name" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="@Model.orderItems[0].Quantity" class="control-label"></label>
+                    <input asp-for="@Model.orderItems[0].Quantity" class="form-control quantity" />
+                    <span asp-validation-for="@Model.orderItems[0].Quantity" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="@Model.orderItems[0].Unit" class="control-label"></label>
+                    <input asp-for="@Model.orderItems[0].Unit" class="form-control unit" />
+                    <span asp-validation-for="@Model.orderItems[0].Unit" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary mt-4" />
+                <a asp-controller="Order" asp-action="Index" class="btn btn-primary mt-4"> Back</a>
+
+            </div>
+        </form>
+        <button class="btn btn-primary mt-4" id="AddOrderItemBtn">AddOrderItem</button>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    }

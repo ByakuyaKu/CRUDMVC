@@ -1,0 +1,77 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - CRUDMVC</title>
+    <link rel="stylesheet" href="~/css/bootswatchDarkly.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/CRUDMVC.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Anime" asp-action="IndexUneditable">TestMvcProject</a>
+                <div class="collapse navbar-collapse" id="navbarColor01">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Order" asp-action="Index">Home</a>
+                        </li>
+                        @*<li class="nav-item">
+                            <a class="nav-link" asp-controller="Manga" asp-action="IndexUneditable">Manga</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Author" asp-action="IndexUneditable">Authors</a>
+                        </li>*@
+                        @*<li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" asp-area="" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Administrating</a>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" asp-controller="Anime" asp-action="Index">Manage animies</a>
+                                <a class="dropdown-item" asp-controller="Manga" asp-action="Index">Manage mangas</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" asp-controller="Author" asp-action="Index">Manage authors</a>
+                                <a class="dropdown-item" asp-controller="Position" asp-action="Index">Manage positions</a>
+                            </div>
+                        </li>*@
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        </li>
+                    </ul>
+                    @*<form class="d-flex">
+                    <input class="form-control me-sm-2" type="text" placeholder="Search" name="searchString">
+                    <button class="btn btn-secondary my-2 my-sm-0" type="submit">Search</button>
+                    </form>*@
+                    <form class="d-flex"
+                          asp-route-sortOrder="@ViewData["CurrentSort"]"
+                          asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                        <input class="form-control me-sm-2" type="datetime-local" placeholder="Search" name="searchString">
+                        <button class="btn btn-secondary my-2 my-sm-0" type="submit">Search</button>
+                    </form>
+                </div>
+            </div>
+        </nav>
+
+
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2022 - CRUDMVC - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa" crossorigin="anonymous"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script src="~/js/Order.js"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

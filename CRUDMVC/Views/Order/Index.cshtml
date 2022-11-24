@@ -1,0 +1,234 @@
+﻿@model CRUDMVC.Models.ViewModels.OrderIndexViewModel
+@*@model PagedList<Order>*@
+@using X.PagedList.Mvc
+@using X.PagedList
+@using X.PagedList.Mvc.Core
+
+@{
+    ViewData["Title"] = "Home";
+}
+
+<div class="row mt-4">
+    <div class="col-8">
+        <h1>Orders</h1>
+    </div>
+    <div class="col-4 text-end mt-3">
+
+        <form id="form" asp-action="Index">
+            <div class="form-group">
+                <label asp-for="DateFrom" class="control-label"> Date from</label>
+                <input asp-for="DateFrom" class="form-control" />
+                <span asp-validation-for="DateFrom" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DateTo" class="control-label"> Date to</label>
+                <input asp-for="DateTo" class="form-control" />
+                <span asp-validation-for="DateTo" class="text-danger"></span>
+            </div>
+            <input type="submit" value="Filter by date" class="btn btn-primary mt-4" />
+            <a asp-controller="Order" asp-action="Create" class="btn btn-primary mt-4"><i class="bi bi-plus-circle"></i>&nbsp Create order</a>
+        </form>
+    </div>
+    <hr class="mt-4" />
+
+    @if (TempData["success"] != null)
+    {
+        <div class="alert alert-dismissible alert-success mt-4">
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <strong>@TempData["success"]</strong>
+        </div>
+    }
+
+    @if (TempData["error"] != null)
+    {
+        <div class="alert alert-dismissible alert-danger mt-4">
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <strong>@TempData["error"]</strong>
+        </div>
+    }
+
+    <div class="row justify-content-md-center">
+        @if (Model.Orders == null || Model.Orders?.Count() == 0)
+        {
+            <div class="mt-4">No Orders</div>
+        }
+        else
+        {
+            @foreach (var order in Model.Orders)
+            {
+                <div class="card  col-3 p-0 m-4">
+                    <a class="text-decoration-none text-white" asp-controller="Order" asp-action="Details" asp-route-id="@order.Id">
+                        <h3 class="card-header">@order.Number</h3>
+                        <div class="card-body">
+                            <h6 class="card-subtitle text-muted">Score @(order.Id)</h6>
+                        </div>
+                        <ul class="list-group list-group-flush">
+
+                            <li class="list-group-item">Type: @order.Date</li>
+
+                            @if (order.Provider != null)
+                            {
+                                <li class="list-group-item">Volumes: @order.Provider.Name</li>
+                            }
+                            else
+                            {
+                                <li class="list-group-item">Provider: unknown</li>
+                            }
+
+                        </ul>
+                        <div class="card-body">
+                            <a asp-controller="Order" asp-action="Edit" asp-route-id="@order.Id" class="btn btn-secondary "><i class="bi bi-pencil-square"></i> &nbsp Edit</a>
+                            <a asp-controller="Order" asp-action="Delete" asp-route-id="@order.Id" class="btn btn-secondary "><i class="bi bi-trash"></i> &nbsp Delete</a>
+                        </div>
+                        <div class="card-footer text-muted">
+                            <p class="card-text">Year @((order.Date.ToString("yyyy")))</p>
+                        </div>
+                    </a>
+                </div>
+            }
+        }
+    </div>
+
+    @if (Model.Orders != null)
+    {
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+
+                @if (!Model.Orders.IsFirstPage)
+                {
+                    <li class="page-item">
+                        <a class="page-link "
+                   asp-action="Index"
+                   asp-route-sortOrder="@ViewData["CurrentSort"]"
+                   asp-route-page="@(Model.Orders.PageNumber - 1)"
+                   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                   class="btn btn-default">
+                            &lt;
+                        </a>
+                    </li>
+                }
+                else
+                {
+                    <li class="page-item">
+                        <a class="page-link"
+                   class="btn btn-default" disabled>
+                            &lt;
+                        </a>
+                    </li>
+                }
+                <li class="page-item">
+                    <a class="page-link"
+                   asp-action="Index"
+                   asp-route-sortOrder="@ViewData["CurrentSort"]"
+                   asp-route-page="@(1)"
+                   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                   class="btn btn-default">
+                        1
+                    </a>
+                </li>
+                @if (Model.Orders.PageNumber - 1 > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link"
+                   class="btn btn-default" disabled>
+                            ...
+                        </a>
+                    </li>
+                }
+                @if (!Model.Orders.IsFirstPage && !Model.Orders.IsLastPage && Model.Orders.PageCount > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link"
+                   class="btn btn-default" disabled>
+                            @Model.Orders.PageNumber
+                        </a>
+                    </li>
+                }
+                @if (Model.Orders.PageCount >= 4)
+                {
+                    @for (int i = 1; i < 3; i++)
+                    {
+                        if (Model.Orders.PageNumber + i < Model.Orders.PageCount)
+                        {
+                            <li class="page-item">
+                                <a class="page-link"
+                   asp-action="Index"
+                   asp-route-sortOrder="@ViewData["CurrentSort"]"
+                   asp-route-page="@(Model.Orders.PageNumber + i)"
+                   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                   class="btn btn-default">
+                                    @(Model.Orders.PageNumber + i)
+                                </a>
+                            </li>
+                        }
+                    }
+
+                    if (Model.Orders.IsLastPage)
+                    {
+                        @for (int i = Model.Orders.PageCount - 3; i < Model.Orders.PageCount; i++)
+                        {
+                            <li class="page-item">
+                                <a class="page-link"
+                   asp-action="Index"
+                   asp-route-sortOrder="@ViewData["CurrentSort"]"
+                   asp-route-page="@(i)"
+                   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                   class="btn btn-default">
+                                    @(
+                                        i
+                                        )
+                                </a>
+                            </li>
+                        }
+                    }
+                }
+                @if (Model.Orders.PageNumber + 3 - Model.Orders.PageCount < 0)
+                {
+                    <li class="page-item">
+                        <a class="page-link"
+                   class="btn btn-default" disabled>
+                            ...
+                        </a>
+                    </li>
+                }
+                @if (Model.Orders.PageCount > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link "
+                   asp-action="Index"
+                   asp-route-sortOrder="@ViewData["CurrentSort"]"
+                   asp-route-page="@(Model.Orders.PageCount)"
+                   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                   class="btn btn-default">
+                            @(Model.Orders.PageCount)
+                        </a>
+                    </li>
+                }
+                @if (!Model.Orders.IsLastPage)
+                {
+                    <li class="page-item">
+                        <a class="page-link "
+                   asp-action="Index"
+                   asp-route-sortOrder="@ViewData["CurrentSort"]"
+                   asp-route-page="@(Model.Orders.PageNumber + 1)"
+                   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+                   asp-route-curDateTo="@ViewData["CurrentDateTo"]"
+                   asp-route-curDateFrom="@ViewData["CurrentDateFrom"]"
+                   class="btn btn-default">
+                            &gt;
+                        </a>
+                    </li>
+                }
+                else
+                {
+                    <li class="page-item">
+                        <a class="page-link"
+                   class="btn btn-default" disabled>
+                            &gt;
+                        </a>
+                    </li>
+                }
+
+            </ul>
+        </nav>
+    }
