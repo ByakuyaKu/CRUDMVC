@@ -16,6 +16,7 @@ using System.Drawing.Printing;
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.ComponentModel.DataAnnotations;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace CRUDMVC.Controllers
 {
@@ -188,22 +189,56 @@ namespace CRUDMVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Number,Date,ProviderId,OrderItems")] Order order)
+        public async Task<IActionResult> Create([Bind("Id,Number,Date,ProviderId,OrderItems")] Order order, string command, int? idItemForDelete)
         {
+            ViewBag.Providers = await _providerRepository.FillProviderViewBagAsync();
             if (!ModelState.IsValid)
+                return View(order);
+
+            try
             {
-                ViewBag.Providers = await _providerRepository.FillProviderViewBagAsync();
+                if (command.Equals("Create"))
+                {
+
+                    _orderRepository.Add(order);
+                    await _orderRepository.SaveChangesAsync();
+
+                    TempData["success"] = "Order created successfully!";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                if (command.Equals("Add"))
+                {
+                    order.OrderItems.Add(new OrderItem());
+                    return View(order);
+                }
+
+                if (command.Equals("Delete"))
+                {
+                    if (idItemForDelete == null)
+                    {
+                        ModelState.AddModelError("", "Error idItemForDelete is null");
+                        return View(order);
+                    }
+
+                    var orderItem = order.OrderItems.FirstOrDefault(i => i.Id == idItemForDelete);
+
+                    if (orderItem == null)
+                        return NotFound();
+
+                    order.OrderItems.Remove(orderItem);
+                    //_orderItemRepository.Remove(orderItem);
+                    //await _orderRepository.SaveChangesAsync();             
+                    return View(order);
+                }
+                ModelState.AddModelError("", "Error no command");
                 return View(order);
             }
-
-
-
-            _orderRepository.Add(order);
-            await _orderRepository.SaveChangesAsync();
-            //_orderRepository.SaveChangesWithValidation();
-
-            TempData["success"] = "Order created successfully!";
-            return RedirectToAction(nameof(Index));
+            catch
+            {
+                ModelState.AddModelError("", "Error while update");
+                return View(order);
+            }
         }
 
         // GET: Order/Edit/5
@@ -272,6 +307,7 @@ namespace CRUDMVC.Controllers
                     //await _orderRepository.SaveChangesAsync();             
                     return View(order);
                 }
+                ModelState.AddModelError("", "Error no command");
                 return View(order);
             }
             catch
