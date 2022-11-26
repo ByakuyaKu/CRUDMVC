@@ -63,7 +63,7 @@ namespace CRUDMVC.Controllers
             return false;
         }
 
-        public async Task<IActionResult> IndexFilterDate(int? page, string? searchString,
+        public IActionResult IndexFilterDate(int? page, string? searchString,
             string? currentDateToFilter, string? currentDateFromFilter, string? currentNumberFilter,
             int? currentProviderIdFilter, string? currentProviderNameFilter, int? providerIdFilter,
             string? currentOrderItemNameFilter, string? currentOrderItemUnitFilter,
@@ -96,8 +96,7 @@ namespace CRUDMVC.Controllers
         // GET: Order
         public async Task<IActionResult> Index(int? page,
             string? currentDateToFilter, string? currentDateFromFilter, string? currentNumberFilter,
-            int? currentProviderIdFilter, //int? providerIdFilter,
-            string? currentProviderNameFilter, //string? providerNameFilter,
+            int? currentProviderIdFilter, string? currentProviderNameFilter,
             string? currentOrderItemNameFilter, string? currentOrderItemUnitFilter,
             OrderIndexViewModel orderIndexViewModel)
         {
@@ -145,13 +144,13 @@ namespace CRUDMVC.Controllers
 
             List<Order> orders;
             if (getFilterDatesRes)
-                orders = _orderRepository.GetOrdersWithFilters(orderIndexViewModel.DateToFilter, orderIndexViewModel.DateFromFilter,
+                orders = await _orderRepository.GetOrdersWithFilters(orderIndexViewModel.DateToFilter, orderIndexViewModel.DateFromFilter,
                     orderIndexViewModel.NumberFilter, orderIndexViewModel.ProviderIdFilter, orderIndexViewModel.ProviderNameFilter,
-                    orderIndexViewModel.OrderItemNameFilter, orderIndexViewModel.OrderItemUnitFilter).ToList();
+                    orderIndexViewModel.OrderItemNameFilter, orderIndexViewModel.OrderItemUnitFilter).ToListAsync();
             else
-                orders = _orderRepository.GetOrdersWithFilters(null, null,
+                orders = await _orderRepository.GetOrdersWithFilters(null, null,
                 orderIndexViewModel.NumberFilter, orderIndexViewModel.ProviderIdFilter, orderIndexViewModel.ProviderNameFilter,
-                orderIndexViewModel.OrderItemNameFilter, orderIndexViewModel.OrderItemUnitFilter).ToList();
+                orderIndexViewModel.OrderItemNameFilter, orderIndexViewModel.OrderItemUnitFilter).ToListAsync();
 
 
             orderIndexViewModel.Orders = (PagedList<Order>?)orders.ToPagedList(pageNumber, pageSize);
@@ -176,9 +175,6 @@ namespace CRUDMVC.Controllers
         // GET: Order/Create
         public async Task<IActionResult> Create()
         {
-            //Order order = new Order();
-            //order.orderItems.Add(new OrderItem());
-
             ViewBag.Providers = await _providerRepository.FillProviderViewBagAsync();
 
             return View();
@@ -227,8 +223,6 @@ namespace CRUDMVC.Controllers
                         return NotFound();
 
                     order.OrderItems.Remove(orderItem);
-                    //_orderItemRepository.Remove(orderItem);
-                    //await _orderRepository.SaveChangesAsync();             
                     return View(order);
                 }
                 ModelState.AddModelError("", "Error no command");
@@ -303,8 +297,6 @@ namespace CRUDMVC.Controllers
                         return NotFound();
 
                     order.OrderItems.Remove(orderItem);
-                    //_orderItemRepository.Remove(orderItem);
-                    //await _orderRepository.SaveChangesAsync();             
                     return View(order);
                 }
                 ModelState.AddModelError("", "Error no command");
@@ -339,17 +331,15 @@ namespace CRUDMVC.Controllers
         {
             var order = await _orderRepository.GetOrderByIdAsync(id);
 
-            if (order != null)
-            {
-                if (order.OrderItems != null)
-                {
-                    _orderItemRepository.RemoveRange(order.OrderItems);
-                    await _orderRepository.SaveChangesAsync();
-                }
+            if (order == null)
+                return NotFound();
 
-                _orderRepository.Remove(order);
-                await _orderRepository.SaveChangesAsync();
-            }
+            if (order.OrderItems != null)
+                _orderItemRepository.RemoveRange(order.OrderItems);
+
+            _orderRepository.Remove(order);
+            await _orderRepository.SaveChangesAsync();
+
 
 
             TempData["success"] = "Order deleted successfully!";

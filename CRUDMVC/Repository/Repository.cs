@@ -16,23 +16,12 @@ namespace CRUDMVC.Repository
         }
 
         public void Add(T item) => _appDbContext.Add(item);
-
         public void Update(T item) => _appDbContext.Update(item);
         public void Remove(T item) => _appDbContext.Remove(item);
-        public void Attach(T item) => _appDbContext.Attach(item);
-        public void ModState(T item) => _appDbContext.Entry(item).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-
-        public void Dettach(T item) => _appDbContext.Entry(item).State = Microsoft.EntityFrameworkCore.EntityState.Detached;
         public void AddRange(List<T> items) => _appDbContext.AddRange(items);
-
         public void UpdateRange(List<T> items) => _appDbContext.UpdateRange(items);
-
         public void RemoveRange(List<T> items) => _appDbContext.RemoveRange(items);
-
-
         public async Task SaveChangesAsync() => await _appDbContext.SaveChangesAsync();
-
-        //public ImmutableList<ValidationResult> SaveChangesWithValidation() => _appDbContext.SaveChangesWithValidation();
 
         private bool disposed = false;
 

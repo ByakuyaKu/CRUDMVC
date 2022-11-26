@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CRUDMVC.Models
 {
-    public class OrderItem// : IValidatableObject
+    public class OrderItem
     {
         [Key]
         public int Id { get; set; }
@@ -21,18 +21,5 @@ namespace CRUDMVC.Models
         public int? OrderId { get; set; }
 
         public Order? Order { get; set; }
-
-
-        //public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-        //{
-        //    if (Name.Equals(Order.Number))
-        //    {
-        //        yield return new ValidationResult(
-        //            "Order item name cant be equal with order name",
-        //            new[] { nameof(Name) });
-        //    }
-
-        //    //if()
-        //}
     }
 }

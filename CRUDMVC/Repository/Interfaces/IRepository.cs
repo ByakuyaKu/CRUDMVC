@@ -8,15 +8,9 @@ namespace CRUDMVC.Repository.Interfaces
         public void Add(T item);
         public void Update(T item);
         public void Remove(T item);
-
-        public void ModState(T item);
         public void AddRange(List<T> items);
         public void UpdateRange(List<T> items);
         public void RemoveRange(List<T> items);
-        public void Attach(T item);
         public Task SaveChangesAsync();
-        public void Dettach(T item);
-
-        //public ImmutableList<ValidationResult> SaveChangesWithValidation();
     }
 }
