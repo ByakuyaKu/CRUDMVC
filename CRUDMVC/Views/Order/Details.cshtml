@@ -29,28 +29,28 @@
         </dd>
 
         <h3 class="mt-4">Order items</h3>
-        @if (Model.orderItems != null && Model.orderItems.Count > 0)
+        @if (Model.OrderItems != null && Model.OrderItems.Count > 0)
         {
-            @for (int i = 0; i < Model.orderItems.Count; i++)
+            @for (int i = 0; i < Model.OrderItems.Count; i++)
             {
                 <hr class="mt-4" />
                 <dt class="col-sm-2">
-                    @Html.DisplayNameFor(model => model.orderItems[i].Name)
+                    @Html.DisplayNameFor(model => model.OrderItems[i].Name)
                 </dt>
                 <dd class="col-sm-10">
-                    @Html.DisplayFor(model => model.orderItems[i].Name)
+                    @Html.DisplayFor(model => model.OrderItems[i].Name)
                 </dd>
                 <dt class="col-sm-2">
-                    @Html.DisplayNameFor(model => model.orderItems[i].Quantity)
+                    @Html.DisplayNameFor(model => model.OrderItems[i].Quantity)
                 </dt>
                 <dd class="col-sm-10">
-                    @Html.DisplayFor(model => model.orderItems[i].Quantity)
+                    @Html.DisplayFor(model => model.OrderItems[i].Quantity)
                 </dd>
                 <dt class="col-sm-2">
-                    @Html.DisplayNameFor(model => model.orderItems[i].Unit)
+                    @Html.DisplayNameFor(model => model.OrderItems[i].Unit)
                 </dt>
                 <dd class="col-sm-10">
-                    @Html.DisplayFor(model => model.orderItems[i].Unit)
+                    @Html.DisplayFor(model => model.OrderItems[i].Unit)
                 </dd>
             }
         }

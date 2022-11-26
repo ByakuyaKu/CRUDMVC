@@ -16,7 +16,7 @@ namespace CRUDMVC.Models
         public DateTime Date { get; set; }
 
         //foreign keys
-        public List<OrderItem> orderItems { get; set; } = new List<OrderItem>();
+        public List<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
         public int ProviderId { get; set; }
 
         public Provider? Provider { get; set; }
@@ -33,7 +33,7 @@ namespace CRUDMVC.Models
                     "Number and ProviderId cant be equal",
                     new[] { nameof(Number), nameof(ProviderId) });
 
-            if (orderItems.Where(i => i.Name.Equals(Number)).Any())
+            if (OrderItems.Where(i => i.Name.Equals(Number)).Any())
             {
                 yield return new ValidationResult(
                     "Order number cant be equal with order item name",
@@ -41,7 +41,7 @@ namespace CRUDMVC.Models
             }
 
             var res = _context?.Orders.FirstOrDefault(o => o.Number.Equals(Number) && o.ProviderId == ProviderId);
-            if ( res != null)
+            if ( res != null && _context?.Entry(res).State == EntityState.Added)
                 yield return new ValidationResult(
                         "Pair order number and providerId must be unique",
                         new[] { nameof(Number) });

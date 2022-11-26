@@ -11,6 +11,11 @@ using CRUDMVC.Repository.Interfaces;
 using X.PagedList;
 using System.Xml.Linq;
 using CRUDMVC.Models.ViewModels;
+using static NuGet.Packaging.PackagingConstants;
+using System.Drawing.Printing;
+using System.Reflection;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System.ComponentModel.DataAnnotations;
 
 namespace CRUDMVC.Controllers
 {
@@ -28,83 +33,129 @@ namespace CRUDMVC.Controllers
             _providerRepository = providerRepository;
             _orderItemRepository = orderItemRepository;
         }
-
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Index(string? sortOrder, string? searchString, string currentFilter, int? page,
-        //     OrderIndexViewModel orderIndexViewModel)
-        //{
-        //    ViewData["CurrentSort"] = sortOrder;
-        //    ViewData["CurrentSortView"] = sortOrder?.Replace("_", " ").ToLower();
-
-        //    ViewData["CurrentDateTo"] = orderIndexViewModel.DateTo;
-        //    ViewData["CurrentDateFrom"] = orderIndexViewModel.DateFrom;
-
-        //    if (searchString != null)
-        //    {
-        //        page = 1;
-        //    }
-        //    else
-        //    {
-        //        searchString = currentFilter;
-        //    }
-
-        //    ViewData["CurrentFilter"] = searchString;
-
-        //    int pageSize = 1;
-        //    int pageNumber = (page ?? 1);
-
-        //    var orders = _orderRepository.GetOrderListIQueryableAsNoTracking(searchString, orderIndexViewModel.DateFrom, orderIndexViewModel.DateTo);
-
-        //    orderIndexViewModel.Orders = (PagedList<Order>?)orders.ToList().ToPagedList(pageNumber, pageSize);
-
-        //    return View(orderIndexViewModel);
-        //}
-
-        // GET: Order
-        public async Task<IActionResult> Index(string? sortOrder, string? searchString, string currentFilter, int? page,
-            string? CurrentDateTo, string? CurrentDateFrom)
+        private bool TryGetFilterDates(string? currentDateToFilter, string? currentDateFromFilter, OrderIndexViewModel orderIndexViewModel)
         {
-            ViewData["CurrentSort"] = sortOrder;
-            ViewData["CurrentSortView"] = sortOrder?.Replace("_", " ").ToLower();
 
-            ViewData["CurrentDateTo"] = CurrentDateTo;
-            ViewData["CurrentDateFrom"] = CurrentDateFrom;
-
-            if (searchString != null)
+            if (currentDateToFilter != null && currentDateFromFilter != null)
             {
+                DateTime to, from;
+
+                if (DateTime.TryParse(currentDateFromFilter, out from) && DateTime.TryParse(currentDateToFilter, out to))
+                {
+                    orderIndexViewModel.DateToFilter = to;
+                    orderIndexViewModel.DateFromFilter = from;
+
+                    return true;
+                }
+            }
+
+            if (orderIndexViewModel.DateToFilter == null && orderIndexViewModel.DateFromFilter == null
+                && currentDateToFilter == null && currentDateFromFilter == null)
+            {
+                var today = DateTime.Now;
+
+                orderIndexViewModel.DateToFilter = today;
+
+                orderIndexViewModel.DateFromFilter = today.AddMonths(-1);
+            }
+
+            return false;
+        }
+
+        public async Task<IActionResult> IndexFilterDate(int? page, string? searchString,
+            string? currentDateToFilter, string? currentDateFromFilter, string? currentNumberFilter,
+            int? currentProviderIdFilter, string? currentProviderNameFilter, int? providerIdFilter,
+            string? currentOrderItemNameFilter, string? currentOrderItemUnitFilter,
+            OrderIndexViewModel orderIndexViewModel)
+        {
+            ViewData["CurrentDateTo"] = orderIndexViewModel.DateToFilter;
+            ViewData["CurrentDateFrom"] = orderIndexViewModel.DateFromFilter;
+
+            ViewData["CurrentProviderIdFilter"] = currentProviderIdFilter;
+            ViewData["CurrentProviderNameFilter"] = currentProviderNameFilter;
+            ViewData["CurrentOrderItemNameFilter"] = currentOrderItemNameFilter;
+            ViewData["CurrentOrderItemUnitFilter"] = currentOrderItemUnitFilter;
+            ViewData["CurrentNumberFilter"] = currentNumberFilter;
+
+            if (orderIndexViewModel.DateToFilter == null || orderIndexViewModel.DateFromFilter == null)
+                return NotFound();
+
+            return RedirectToAction(nameof(Index), new
+            {
+                currentDateToFilter = orderIndexViewModel.DateToFilter.ToString(),
+                currentDateFromFilter = orderIndexViewModel.DateFromFilter.ToString(),
+                currentNumberFilter = currentNumberFilter,
+                currentProviderIdFilter = currentProviderIdFilter,
+                currentOrderItemNameFilter = currentOrderItemNameFilter,
+                currentOrderItemUnitFilter = currentOrderItemUnitFilter,
+                currentProviderNameFilter = currentProviderNameFilter,
+                page = page
+            });
+        }
+        // GET: Order
+        public async Task<IActionResult> Index(int? page,
+            string? currentDateToFilter, string? currentDateFromFilter, string? currentNumberFilter,
+            int? currentProviderIdFilter, //int? providerIdFilter,
+            string? currentProviderNameFilter, //string? providerNameFilter,
+            string? currentOrderItemNameFilter, string? currentOrderItemUnitFilter,
+            OrderIndexViewModel orderIndexViewModel)
+        {
+
+            var getFilterDatesRes = TryGetFilterDates(currentDateToFilter, currentDateFromFilter, orderIndexViewModel);
+
+            if (orderIndexViewModel.ProviderIdFilter != null)
                 page = 1;
-            }
             else
-            {
-                searchString = currentFilter;
-            }
+                orderIndexViewModel.ProviderIdFilter = currentProviderIdFilter;
 
-            ViewData["CurrentFilter"] = searchString;
+            if (orderIndexViewModel.ProviderNameFilter != null)
+                page = 1;
+            else
+                orderIndexViewModel.ProviderNameFilter = currentProviderNameFilter;
 
-            int pageSize = 1;
+            if (orderIndexViewModel.OrderItemNameFilter != null)
+                page = 1;
+            else
+                orderIndexViewModel.OrderItemNameFilter = currentOrderItemNameFilter;
+
+            if (orderIndexViewModel.OrderItemUnitFilter != null)
+                page = 1;
+            else
+                orderIndexViewModel.OrderItemUnitFilter = currentOrderItemUnitFilter;
+
+            if (orderIndexViewModel.NumberFilter != null)
+                page = 1;
+            else
+                orderIndexViewModel.NumberFilter = currentNumberFilter;
+
+            ViewData["CurrentNumberFilter"] = orderIndexViewModel.NumberFilter;
+
+            ViewData["CurrentProviderIdFilter"] = orderIndexViewModel.ProviderIdFilter;
+            ViewData["CurrentProviderNameFilter"] = orderIndexViewModel.ProviderNameFilter;
+
+            ViewData["CurrentOrderItemNameFilter"] = orderIndexViewModel.OrderItemNameFilter;
+            ViewData["CurrentOrderItemUnitFilter"] = orderIndexViewModel.OrderItemUnitFilter;
+
+            ViewData["CurrentDateTo"] = currentDateToFilter;
+            ViewData["CurrentDateFrom"] = currentDateFromFilter;
+
+            int pageSize = 10;
             int pageNumber = (page ?? 1);
 
-            var model = new OrderIndexViewModel();
+            List<Order> orders;
+            if (getFilterDatesRes)
+                orders = _orderRepository.GetOrdersWithFilters(orderIndexViewModel.DateToFilter, orderIndexViewModel.DateFromFilter,
+                    orderIndexViewModel.NumberFilter, orderIndexViewModel.ProviderIdFilter, orderIndexViewModel.ProviderNameFilter,
+                    orderIndexViewModel.OrderItemNameFilter, orderIndexViewModel.OrderItemUnitFilter).ToList();
+            else
+                orders = _orderRepository.GetOrdersWithFilters(null, null,
+                orderIndexViewModel.NumberFilter, orderIndexViewModel.ProviderIdFilter, orderIndexViewModel.ProviderNameFilter,
+                orderIndexViewModel.OrderItemNameFilter, orderIndexViewModel.OrderItemUnitFilter).ToList();
 
-            DateTime from, to;
-            IQueryable<Order> orders;
 
-            if (CurrentDateFrom != null && CurrentDateTo != null)
-                if (DateTime.TryParse(CurrentDateFrom, out from) && DateTime.TryParse(CurrentDateTo, out to))
-                {
-                    orders = _orderRepository.GetOrderListIQueryableAsNoTracking(searchString, from, to);
+            orderIndexViewModel.Orders = (PagedList<Order>?)orders.ToPagedList(pageNumber, pageSize);
 
-                    model.Orders = (PagedList<Order>?)orders.ToList().ToPagedList(pageNumber, pageSize);
-
-                    return View(model);
-                }
-
-            orders = _orderRepository.GetOrderListIQueryableAsNoTracking(searchString);
-
-            model.Orders = (PagedList<Order>?)orders.ToList().ToPagedList(pageNumber, pageSize);
-
-            return View(model);
+            return View(orderIndexViewModel);
         }
 
         // GET: Order/Details/5
@@ -137,7 +188,7 @@ namespace CRUDMVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Number,Date,ProviderId,orderItems")] Order order)
+        public async Task<IActionResult> Create([Bind("Id,Number,Date,ProviderId,OrderItems")] Order order)
         {
             if (!ModelState.IsValid)
             {
@@ -166,6 +217,8 @@ namespace CRUDMVC.Controllers
             if (order == null)
                 return NotFound();
 
+            ViewBag.Providers = await _providerRepository.FillProviderViewBagAsync();
+
             return View(order);
         }
 
@@ -174,7 +227,7 @@ namespace CRUDMVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Number,Date,ProviderId")] Order order)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Number,Provider,Date,ProviderId,OrderItems")] Order order, string command, int? idItemForDelete)
         {
             if (order == null || id != order.Id)
                 return NotFound();
@@ -182,29 +235,50 @@ namespace CRUDMVC.Controllers
             if (!ModelState.IsValid)
                 return View(order);
 
+            ViewBag.Providers = await _providerRepository.FillProviderViewBagAsync();
             try
             {
-                _orderRepository.Update(order);
-                await _orderRepository.SaveChangesAsync();
+                if (command.Equals("Save"))
+                {
 
-                TempData["success"] = "Order updated successfully!";
+                    _orderRepository.Update(order);
+                    await _orderRepository.SaveChangesAsync();
+
+                    TempData["success"] = "Order updated successfully!";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                if (command.Equals("Add"))
+                {
+                    order.OrderItems.Add(new OrderItem());
+                    return View(order);
+                }
+
+                if (command.Equals("Delete"))
+                {
+                    if (idItemForDelete == null)
+                    {
+                        ModelState.AddModelError("", "Error idItemForDelete is null");
+                        return View(order);
+                    }
+
+                    var orderItem = order.OrderItems.FirstOrDefault(i => i.Id == idItemForDelete);
+
+                    if (orderItem == null)
+                        return NotFound();
+
+                    order.OrderItems.Remove(orderItem);
+                    //_orderItemRepository.Remove(orderItem);
+                    //await _orderRepository.SaveChangesAsync();             
+                    return View(order);
+                }
+                return View(order);
             }
-            //catch
-            //{
-            //    if (!await _orderRepository.OrderExistsAsync(order.Id))
-            //    {
-            //        return NotFound();
-            //    }
-            //    else
-            //    {
-            //        return NotFound();
-            //    }
-            //}
             catch
             {
-                return NotFound();
+                ModelState.AddModelError("", "Error while update");
+                return View(order);
             }
-            return RedirectToAction(nameof(Index));
         }
 
 
@@ -231,16 +305,16 @@ namespace CRUDMVC.Controllers
 
             if (order != null)
             {
-                if (order.orderItems != null)
+                if (order.OrderItems != null)
                 {
-                    _orderItemRepository.RemoveRange(order.orderItems);
+                    _orderItemRepository.RemoveRange(order.OrderItems);
                     await _orderRepository.SaveChangesAsync();
                 }
 
                 _orderRepository.Remove(order);
                 await _orderRepository.SaveChangesAsync();
             }
-            
+
 
             TempData["success"] = "Order deleted successfully!";
 

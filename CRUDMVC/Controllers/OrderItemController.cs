@@ -106,33 +106,37 @@ namespace CRUDMVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Quantity,Unit,OrderId")] OrderItem orderItem)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Quantity,Unit,OrderId, Order")] OrderItem orderItem)
         {
             if (orderItem == null || id != orderItem.Id)
                 return NotFound();
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
                 return View(orderItem);
 
-            try
+            //var o = await _orderItemRepository.GetOrderItemByIdAsNoTrackingAsync(id);
+            //orderItem.Order = o.Order;
+            //orderItem.OrderId = o.OrderId;
+
+            //try
             {
-                _orderItemRepository.Update(orderItem);
+                //_orderItemRepository.Update(orderItem);
                 await _orderItemRepository.SaveChangesAsync();
 
                 TempData["success"] = "Order updated successfully!";
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!await _orderItemRepository.OrderItemExistsAsync(orderItem.Id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-            return RedirectToAction(nameof(Index));
+            //catch (DbUpdateConcurrencyException)
+            //{
+            //    if (!await _orderItemRepository.OrderItemExistsAsync(orderItem.Id))
+            //    {
+            //        return NotFound();
+            //    }
+            //    else
+            //    {
+            //        return NotFound();
+            //    }
+            //}
+            return RedirectToAction(nameof(Index), "Order");
         }
 
         // GET: OrderItem/Delete/5

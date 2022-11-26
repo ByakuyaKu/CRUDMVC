@@ -7,17 +7,18 @@ namespace CRUDMVC.Models.ViewModels
     {
         public PagedList<Order>? Orders { get; set; }
         [Precision(3)]
-        public DateTime? DateFrom { get; set; }// = DateTime.Now.AddMonths(-1);
+        public DateTime? DateFromFilter { get; set; }
         [Precision(3)]
-        public DateTime? DateTo { get; set; }// = DateTime.Now;
+        public DateTime? DateToFilter { get; set; }
 
-        public OrderIndexViewModel()
-        {
-            var today = DateTime.Now;
+        public string? NumberFilter { get; set; }
 
-            DateTo = today;
+        public int? ProviderIdFilter { get; set; }
 
-            DateFrom = today.AddMonths(-1);
-        }
+        public string? ProviderNameFilter { get; set; }
+
+        public string? OrderItemNameFilter { get; set; }
+
+        public string? OrderItemUnitFilter { get; set; }
     }
 }

@@ -27,5 +27,16 @@ namespace CRUDMVC.Repository.Interfaces
         public IQueryable<Order> GetOrderListIQueryableAsNoTracking(string? searchString, DateTime? dateFrom, DateTime? dateTo);
 
         public Task<bool> OrderExistsAsync(int id);
+
+        public IQueryable<Order> GetOrderListFilteringByOrderItemUnitAsNoTracking(string unit);
+        public IQueryable<Order> GetOrderListFilteringByOrderItemNameAsNoTracking(string name);
+        public IQueryable<Order> GetOrderListFilteringByProviderNameAsNoTracking(string name);
+        public IQueryable<Order> GetOrderListFilteringByProviderIdAsNoTracking(int id);
+        public IQueryable<Order> GetOrderListFilteringByNumberAsNoTracking(string number);
+        public IQueryable<Order> GetOrderListFilteringByDateAsNoTracking(DateTime dateFrom, DateTime dateTo);
+        public IQueryable<Order> GetOrdersWithFilters(DateTime? dateToFilter, DateTime? dateFromFilter,
+            string? numberFilter, int? providerIdFilter, string? providerNameFilter, 
+            string? orderItemNameFilter, string? orderItemUnitFilter);
+        //public IQueryable<Order> GetOrdersWithFilters(DateTime? dateToFilter, DateTime? dateFromFilter, string? numberFilter, int? providerIdFilter, string? providerNameFilter, string? orderItemNameFilter, string? orderItemUnitFilter);
     }
 }
