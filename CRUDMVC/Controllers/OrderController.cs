@@ -63,9 +63,8 @@ namespace CRUDMVC.Controllers
             return false;
         }
 
-        public IActionResult IndexFilterDate(int? page, string? searchString,
-            string? currentDateToFilter, string? currentDateFromFilter, string? currentNumberFilter,
-            int? currentProviderIdFilter, string? currentProviderNameFilter, int? providerIdFilter,
+        public IActionResult IndexFilterDate(int? page, string? currentNumberFilter,
+            int? currentProviderIdFilter, string? currentProviderNameFilter,
             string? currentOrderItemNameFilter, string? currentOrderItemUnitFilter,
             OrderIndexViewModel orderIndexViewModel)
         {
@@ -90,7 +89,35 @@ namespace CRUDMVC.Controllers
                 currentOrderItemNameFilter = currentOrderItemNameFilter,
                 currentOrderItemUnitFilter = currentOrderItemUnitFilter,
                 currentProviderNameFilter = currentProviderNameFilter,
-                page = page
+                page = 1
+            });
+        }
+
+        public IActionResult IndexFilterAdditional(int? page,
+            string? currentDateToFilter, string? currentDateFromFilter,
+            OrderIndexViewModel orderIndexViewModel)
+        {
+            ViewData["CurrentDateTo"] = currentDateToFilter;
+            ViewData["CurrentDateFrom"] = currentDateFromFilter;
+
+            ViewData["CurrentProviderIdFilter"] = orderIndexViewModel.ProviderIdFilter;
+            ViewData["CurrentProviderNameFilter"] = orderIndexViewModel.ProviderNameFilter;
+
+            ViewData["CurrentOrderItemNameFilter"] = orderIndexViewModel.OrderItemNameFilter;
+            ViewData["CurrentOrderItemUnitFilter"] = orderIndexViewModel.OrderItemUnitFilter;
+
+            ViewData["CurrentNumberFilter"] = orderIndexViewModel.NumberFilter;   
+
+            return RedirectToAction(nameof(Index), new
+            {
+                currentDateToFilter = currentDateToFilter,
+                currentDateFromFilter = currentDateFromFilter,
+                currentNumberFilter = orderIndexViewModel.NumberFilter,
+                currentProviderIdFilter = orderIndexViewModel.ProviderIdFilter,
+                currentOrderItemNameFilter = orderIndexViewModel.OrderItemNameFilter,
+                currentOrderItemUnitFilter = orderIndexViewModel.OrderItemUnitFilter,
+                currentProviderNameFilter = orderIndexViewModel.ProviderNameFilter,               
+                page = 1
             });
         }
         // GET: Order
@@ -103,41 +130,22 @@ namespace CRUDMVC.Controllers
 
             var getFilterDatesRes = TryGetFilterDates(currentDateToFilter, currentDateFromFilter, orderIndexViewModel);
 
-            if (orderIndexViewModel.ProviderIdFilter != null)
-                page = 1;
-            else
-                orderIndexViewModel.ProviderIdFilter = currentProviderIdFilter;
+            ViewData["CurrentNumberFilter"] = currentNumberFilter;
 
-            if (orderIndexViewModel.ProviderNameFilter != null)
-                page = 1;
-            else
-                orderIndexViewModel.ProviderNameFilter = currentProviderNameFilter;
+            ViewData["CurrentProviderIdFilter"] = currentProviderIdFilter;
+            ViewData["CurrentProviderNameFilter"] = currentProviderNameFilter;
 
-            if (orderIndexViewModel.OrderItemNameFilter != null)
-                page = 1;
-            else
-                orderIndexViewModel.OrderItemNameFilter = currentOrderItemNameFilter;
-
-            if (orderIndexViewModel.OrderItemUnitFilter != null)
-                page = 1;
-            else
-                orderIndexViewModel.OrderItemUnitFilter = currentOrderItemUnitFilter;
-
-            if (orderIndexViewModel.NumberFilter != null)
-                page = 1;
-            else
-                orderIndexViewModel.NumberFilter = currentNumberFilter;
-
-            ViewData["CurrentNumberFilter"] = orderIndexViewModel.NumberFilter;
-
-            ViewData["CurrentProviderIdFilter"] = orderIndexViewModel.ProviderIdFilter;
-            ViewData["CurrentProviderNameFilter"] = orderIndexViewModel.ProviderNameFilter;
-
-            ViewData["CurrentOrderItemNameFilter"] = orderIndexViewModel.OrderItemNameFilter;
-            ViewData["CurrentOrderItemUnitFilter"] = orderIndexViewModel.OrderItemUnitFilter;
+            ViewData["CurrentOrderItemNameFilter"] = currentOrderItemNameFilter;
+            ViewData["CurrentOrderItemUnitFilter"] = currentOrderItemUnitFilter;
 
             ViewData["CurrentDateTo"] = currentDateToFilter;
             ViewData["CurrentDateFrom"] = currentDateFromFilter;
+
+            orderIndexViewModel.OrderItemUnitFilter = currentOrderItemUnitFilter;
+            orderIndexViewModel.OrderItemNameFilter = currentOrderItemNameFilter;
+            orderIndexViewModel.NumberFilter = currentNumberFilter;
+            orderIndexViewModel.ProviderIdFilter = currentProviderIdFilter;
+            orderIndexViewModel.ProviderNameFilter = currentProviderNameFilter;
 
             int pageSize = 10;
             int pageNumber = (page ?? 1);
@@ -151,7 +159,6 @@ namespace CRUDMVC.Controllers
                 orders = await _orderRepository.GetOrdersWithFilters(null, null,
                 orderIndexViewModel.NumberFilter, orderIndexViewModel.ProviderIdFilter, orderIndexViewModel.ProviderNameFilter,
                 orderIndexViewModel.OrderItemNameFilter, orderIndexViewModel.OrderItemUnitFilter).ToListAsync();
-
 
             orderIndexViewModel.Orders = (PagedList<Order>?)orders.ToPagedList(pageNumber, pageSize);
 
@@ -187,14 +194,13 @@ namespace CRUDMVC.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Number,Date,ProviderId,OrderItems")] Order order, string command, int? idItemForDelete)
         {
-            ViewBag.Providers = await _providerRepository.FillProviderViewBagAsync();
-            if (!ModelState.IsValid)
-                return View(order);
-
+            ViewBag.Providers = await _providerRepository.FillProviderViewBagAsync();          
             try
             {
                 if (command.Equals("Create"))
                 {
+                    if (!ModelState.IsValid)
+                        return View(order);
 
                     _orderRepository.Add(order);
                     await _orderRepository.SaveChangesAsync();
@@ -230,7 +236,7 @@ namespace CRUDMVC.Controllers
             }
             catch
             {
-                ModelState.AddModelError("", "Error while update");
+                ModelState.AddModelError("", "Error while create");
                 return View(order);
             }
         }
@@ -261,14 +267,15 @@ namespace CRUDMVC.Controllers
             if (order == null || id != order.Id)
                 return NotFound();
 
-            if (!ModelState.IsValid)
-                return View(order);
-
             ViewBag.Providers = await _providerRepository.FillProviderViewBagAsync();
+
+            
             try
             {
                 if (command.Equals("Save"))
                 {
+                    if (!ModelState.IsValid)
+                        return View(order);
 
                     _orderRepository.Update(order);
                     await _orderRepository.SaveChangesAsync();
@@ -339,8 +346,6 @@ namespace CRUDMVC.Controllers
 
             _orderRepository.Remove(order);
             await _orderRepository.SaveChangesAsync();
-
-
 
             TempData["success"] = "Order deleted successfully!";
 

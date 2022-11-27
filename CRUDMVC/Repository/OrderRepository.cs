@@ -22,8 +22,7 @@ namespace CRUDMVC.Repository
         public IQueryable<Order> GetAllIQueryableAsNoTracking() => _appDbContext.Orders
             .Include(o => o.Provider)
             .Include(o => o.OrderItems)
-            .AsNoTracking()
-            .AsQueryable();
+            .AsNoTracking();
 
         public async Task<Order> GetOrderByIdAsync(int id) => await _appDbContext.Orders
             .Include(o => o.Provider)
@@ -31,9 +30,9 @@ namespace CRUDMVC.Repository
             .FirstOrDefaultAsync(o => o.Id == id);
 
         public async Task<Order> GetOrderByIdAsNoTrackingAsync(int id) => await _appDbContext.Orders
-            .AsNoTracking()
             .Include(o => o.Provider)
             .Include(o => o.OrderItems)
+            .AsNoTracking()
             .FirstOrDefaultAsync(o => o.Id == id);
 
         public IQueryable<Order> GetOrderListFilteringByDateAsNoTracking(DateTime dateFrom, DateTime dateTo)
@@ -42,10 +41,10 @@ namespace CRUDMVC.Repository
 
 
             OrderList = _appDbContext.Orders
-                 .AsNoTracking()
                  .Include(o => o.Provider)
                  .Include(o => o.OrderItems)
-                 .Where(o => o.Date >= dateFrom && o.Date <= dateTo);
+                 .Where(o => o.Date >= dateFrom && o.Date <= dateTo)
+                 .AsNoTracking();
 
             return OrderList;
         }
@@ -56,10 +55,10 @@ namespace CRUDMVC.Repository
 
 
             OrderList = _appDbContext.Orders
-                 .AsNoTracking()
                  .Include(o => o.Provider)
                  .Include(o => o.OrderItems)
-                 .Where(o => o.Number.Equals(number));
+                 .Where(o => o.Number.Equals(number))
+                 .AsNoTracking();
 
             return OrderList;
         }
@@ -69,10 +68,10 @@ namespace CRUDMVC.Repository
             IQueryable<Order> OrderList;
 
             OrderList = _appDbContext.Orders
-                 .AsNoTracking()
                  .Include(o => o.Provider)
                  .Include(o => o.OrderItems)
-                 .Where(o => o.ProviderId == id);
+                 .Where(o => o.ProviderId == id)
+                 .AsNoTracking();
 
             return OrderList;
         }
@@ -82,10 +81,10 @@ namespace CRUDMVC.Repository
             IQueryable<Order> OrderList;
 
             OrderList = _appDbContext.Orders
-                 .AsNoTracking()
                  .Include(o => o.Provider)
                  .Include(o => o.OrderItems)
-                 .Where(o => o.Provider.Name.Equals(name));
+                 .Where(o => o.Provider.Name.Equals(name))
+                 .AsNoTracking();
 
             return OrderList;
         }
@@ -95,10 +94,10 @@ namespace CRUDMVC.Repository
             IQueryable<Order> OrderList;
 
             OrderList = _appDbContext.Orders
-                 .AsNoTracking()
                  .Include(o => o.Provider)
                  .Include(o => o.OrderItems)
-                 .Where(o => o.OrderItems.Any(i => i.Name.Equals(name)));
+                 .Where(o => o.OrderItems.Any(i => i.Name.Equals(name)))
+                 .AsNoTracking();
 
             return OrderList;
         }
@@ -108,10 +107,10 @@ namespace CRUDMVC.Repository
             IQueryable<Order> OrderList;
 
             OrderList = _appDbContext.Orders
-                 .AsNoTracking()
                  .Include(o => o.Provider)
                  .Include(o => o.OrderItems)
-                 .Where(o => o.OrderItems.Any(i => i.Unit.Equals(unit)));
+                 .Where(o => o.OrderItems.Any(i => i.Unit.Equals(unit)))
+                 .AsNoTracking();
 
             return OrderList;
         }

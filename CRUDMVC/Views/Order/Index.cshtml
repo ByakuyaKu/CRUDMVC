@@ -9,8 +9,39 @@
 }
 
 <div class="row mt-4">
-    <div class="col-8">
-        <h1>Orders</h1>
+    <div class="col-4 mt-2">
+        <h1>Orders <a asp-controller="Order" asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-circle"></i>&nbsp Create order</a></h1>
+    </div>
+
+    <div class="col-4 text-end">
+        <div class="btn-group col-6 mt-4" role="group">
+            <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Additional filters</button>
+            <div class="dropdown-menu col-12">
+                <form class=" px-4 py-3" asp-action="IndexFilterAdditional" method="post"
+                      asp-route-currentDateToFilter="@ViewData["CurrentDateTo"]"
+                      asp-route-currentDateFromFilter="@ViewData["CurrentDateFrom"]"
+                      asp-route-currentProviderIdFilter="@ViewData["CurrentProviderIdFilter"]"
+                      asp-route-currentProviderNameFilter="@ViewData["CurrentProviderNameFilter"]"
+                      asp-route-currentOrderItemNameFilter="@ViewData["CurrentOrderItemNameFilter"]"
+                      asp-route-currentOrderItemUnitFilter="@ViewData["CurrentOrderItemUnitFilter"]"
+                      asp-route-currentNumberFilter="@ViewData["CurrentNumberFilter"]">
+                    <div class="form-group mt-2">
+                        <input class="form-control me-sm-2" type="number" placeholder="provider id" asp-for="@Model.ProviderIdFilter">
+                    </div>
+                    <div class="form-group mt-2">
+                        <input class="form-control me-sm-2" type="text" placeholder="provider name" asp-for="@Model.ProviderNameFilter">
+                    </div>
+                    <div class="form-group mt-2">
+                        <input class="form-control me-sm-2" type="text" placeholder="order item name" asp-for="@Model.OrderItemNameFilter">
+                    </div>
+                    <div class="form-group mt-2">
+                        <input class="form-control me-sm-2" type="text" placeholder="order item unit name" asp-for="@Model.OrderItemUnitFilter">
+                    </div>
+
+                    <button class="btn btn-secondary mt-2" type="submit">Filter orders</button>
+                </form>
+            </div>
+        </div>
     </div>
     <div class="col-4 text-end mt-3">
 
@@ -30,38 +61,10 @@
                 <span asp-validation-for="DateToFilter" class="text-danger"></span>
             </div>
             <input type="submit" value="Filter by date" class="btn btn-primary mt-4" />
-            <a asp-controller="Order" asp-action="Create" class="btn btn-primary mt-4"><i class="bi bi-plus-circle"></i>&nbsp Create order</a>
         </form>
     </div>
-
-    @*<form class="d-flex"
-    asp-route-sortOrder="@ViewData["CurrentSort"]"
-    asp-route-currentFilter="@ViewData["CurrentFilter"]"
-    asp-route-currentDateToFilter="@ViewData["CurrentDateTo"]"
-    asp-route-currentDateFromFilter="@ViewData["CurrentDateFrom"]">
-    <input class="form-control me-sm-2" type="datetime-local" placeholder="Date from" name="dateFrom" value="@DateTime.Today.AddMonths(-1).ToString()">
-    <input class="form-control me-sm-2" type="datetime-local" placeholder="Date to" name="dateTo" value="@DateTime.Today.ToString()">
-    <button class="btn btn-secondary my-2 my-sm-0" type="submit">Filter by date</button>
-    </form>*@
-
-    <form class="d-flex" asp-action="Index"
-          asp-route-currentDateToFilter="@ViewData["CurrentDateTo"]"
-          asp-route-currentDateFromFilter="@ViewData["CurrentDateFrom"]"
-          asp-route-currentProviderIdFilter="@ViewData["CurrentProviderIdFilter"]"
-          asp-route-currentProviderNameFilter="@ViewData["CurrentProviderNameFilter"]"
-          asp-route-currentOrderItemNameFilter="@ViewData["CurrentOrderItemNameFilter"]"
-          asp-route-currentOrderItemUnitFilter="@ViewData["CurrentOrderItemUnitFilter"]"
-          asp-route-currentNumberFilter="@ViewData["CurrentNumberFilter"]">
-
-        <input class="form-control me-sm-2" type="number" placeholder="provider id" asp-for="@Model.ProviderIdFilter" >
-        <input class="form-control me-sm-2" type="text" placeholder="provider name" asp-for="@Model.ProviderNameFilter" >
-
-        <input class="form-control me-sm-2" type="text" placeholder="order item name" asp-for="@Model.OrderItemNameFilter" >
-        <input class="form-control me-sm-2" type="text" placeholder="order item unit name" asp-for="@Model.OrderItemUnitFilter" >
-
-        <button class="btn btn-secondary my-2 my-sm-0" type="submit">Filter orders</button>
-    </form>
 </div>
+
 <hr class="mt-4" />
 
 @if (TempData["success"] != null)
