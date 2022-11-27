@@ -62,7 +62,8 @@ namespace CRUDMVC.Controllers
 
             return false;
         }
-
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult IndexFilterDate(int? page, string? currentNumberFilter,
             int? currentProviderIdFilter, string? currentProviderNameFilter,
             string? currentOrderItemNameFilter, string? currentOrderItemUnitFilter,
@@ -92,7 +93,8 @@ namespace CRUDMVC.Controllers
                 page = 1
             });
         }
-
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult IndexFilterAdditional(int? page,
             string? currentDateToFilter, string? currentDateFromFilter,
             OrderIndexViewModel orderIndexViewModel)
